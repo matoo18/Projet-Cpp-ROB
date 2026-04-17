@@ -1,0 +1,10 @@
+*.log
+*.aux
+*.out
+*.gz
+*.toc
+*.png
+*.pdf
+*.tex
+*~
+*/
