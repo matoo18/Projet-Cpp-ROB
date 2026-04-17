@@ -1,12 +1,24 @@
-*.log
-*.aux
-*.out
-*.gz
-*.toc
-*.png
-*.pdf
-*.tex
-*.exe
+# Fichiers objets
 *.o
-*~
-*/
+*.obj
+
+# Bibliothèques
+*.so
+*.dylib
+*.dll
+*.a
+*.lib
+
+# Exécutables classiques
+*.exe
+*.out
+*.app
+
+# Fichiers de crash ou de debug
+*.dSYM/
+*.suo
+*.pdb
+*.idb
+
+# Autres 
+*.pdf
