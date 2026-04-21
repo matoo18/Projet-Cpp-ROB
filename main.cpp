@@ -1,4 +1,5 @@
 #include "donjon.h"
+#include <iostream>
 
 int main(){
     Donjon don;
