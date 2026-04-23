@@ -2,7 +2,13 @@
 #include "aventurier.h"
 #include <iostream>
 
+#define LARGEUR 11
+#define HAUTEUR 11
 using namespace std;
+
+void clearScreen() { //Fonction simple pour clear la console car c'est pas ouf de garder les anciennes impressions.
+    cout << "\033[2J\033[1;1H";
+}
 
 
 int main(){
@@ -11,13 +17,13 @@ int main(){
 
 
     //Initialisation Donjon + Joueur
-    don.generer(21,11);//On génére le donjon.
+    don.generer(LARGEUR,HAUTEUR);//On génére le donjon.
     joueur.generer(don); //On génére le joueur dans la donjon
 
 
     while(joueur.estVivant() == true){ //Boucle de jeu
-        don.afficher(); //On affiche le donjon
         joueur.afficherStatut(); //On affiche les infos du joueur;
+        don.afficher(); //On affiche le donjon
         
         int nx = joueur.getPosition().first;
         int ny = joueur.getPosition().second;
@@ -48,7 +54,6 @@ int main(){
         }
 
         //On déplace le joueur
-
         joueur.deplacer(nx,ny, don);
 
     }

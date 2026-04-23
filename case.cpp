@@ -1,4 +1,5 @@
 #include "case.h"
+#include "aventurier.h"
 
 using namespace std;
 
@@ -21,5 +22,19 @@ Case* CaseFactory::creerCase(TypeCase type_of_case) {
     if (type_of_case == SORTIE) return new Sortie();
     if (type_of_case == AVENTURIER) return new CaseAventurier();
     return nullptr;
+}
+
+
+
+void Monstre::effet(Aventurier& joueur) {
+    joueur.setPV(joueur.getPV() - 1);
+}
+
+void Tresor::effet(Aventurier& joueur) {
+    joueur.setTresors(joueur.getTresors() + 1);
+}
+
+void Piege::effet(Aventurier& joueur) {
+    joueur.setPV(joueur.getPV() - 1);
 }
 

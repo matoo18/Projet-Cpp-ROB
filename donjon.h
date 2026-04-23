@@ -5,11 +5,13 @@
 #define CHEMIN_COULEUR_IDEAL "\033[42m"
 
 #include <vector>
-#include "case.h"
 #include <utility>
 #include <queue>
 
+
 using namespace std;
+
+class Case;
 
 enum TypeDirection {
     Nord,

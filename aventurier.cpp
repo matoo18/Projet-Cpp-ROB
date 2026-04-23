@@ -14,8 +14,19 @@ using namespace std;
 //FONC PUBLIQUES
 //#################################################################
 
-int Aventurier::getPv(){
+int Aventurier::getPV(){
     return pv;
+}
+
+void Aventurier::setPV(int val){
+    pv = val;
+}
+int Aventurier::getTresors(){
+    return tresors;
+}
+
+void Aventurier::setTresors(int val){
+    tresors = val;
 }
 
 pair<int,int> Aventurier::getPosition(){
@@ -34,6 +45,7 @@ bool Aventurier::estVivant(){
 void Aventurier::afficherStatut(){
     cout << "STATUT:" << endl;
     cout << "Point de Vie (PV): " << pv << endl;
+    cout << "Trésors: " << tresors << endl;
     cout << "Position Courante: (" << position.first << "," << position.second << ")" << endl;
 }
 
@@ -41,6 +53,7 @@ void Aventurier::afficherStatut(){
 void Aventurier::generer(Donjon& don){
     pv = 10;
     position = {0,0};
+    tresors = 0;
     deplacer(0,0, don);
 }
 
@@ -65,6 +78,5 @@ void Aventurier::deplacer(int nx,int ny, Donjon& don){
 
 
 void Aventurier::resoudreCase(Case* cas){
-    //Lancer les actions de la case sur l'aventurier, il faudra rajouter une fonction à la classe Case nomée Effet on un truc du genre.
-    cout << "" << endl;
+    cas->effet(*this);
 }
