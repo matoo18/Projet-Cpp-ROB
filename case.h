@@ -10,7 +10,8 @@ enum TypeCase {
     MONSTRE, 
     PIEGE,
     ENTREE,
-    SORTIE
+    SORTIE,
+    AVENTURIER
 };
 
 class Case {
@@ -60,6 +61,12 @@ class Sortie : public Case {
 public:
     void afficher() override;
     TypeCase getType() const override { return SORTIE; }
+};
+
+class CaseAventurier : public Case {
+public:
+    void afficher() override;
+    TypeCase getType() const override { return AVENTURIER; }
 };
 
 

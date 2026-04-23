@@ -1,4 +1,5 @@
 #include "donjon.h"
+#include "case.h"
 
 #include <iostream>
 #include <algorithm>
@@ -66,6 +67,19 @@ void Donjon::placerElements(){
 
 }
 
+vector<pair<int,int>> reconstruireChemin(vector<vector<pair<int,int>>> parent, pair<int,int> depart, pair<int,int>arrivee){
+    vector<pair<int,int>> chemin;
+    pair<int,int>courant = arrivee;
+    
+    while(courant != depart){
+        chemin.push_back(courant);
+        courant = parent[courant.second][courant.first];
+    }
+
+    chemin.push_back(depart);
+    return chemin;
+}
+
 
 //#################################################################
 //FONC PUBLIQUES
@@ -109,4 +123,66 @@ void Donjon::afficher(){
     }
     cout << "+";
     cout << "\n";
+}
+
+
+vector<pair<int,int>> Donjon::trouverChemin(pair<int,int> depart, pair<int,int>arrivee){
+    queue<pair<int,int>> file;
+    vector<vector<bool>> visitee(grille.size(), vector<bool>(grille[0].size(), false));
+    vector<vector<pair<int,int>>> parent(grille.size(), vector<pair<int,int>>(grille[0].size(), {-1,-1})); //On peut utiliser make_pair(-1,-1) ou {-1,-1} pour definifir une pair
+
+    file.push(depart); //On met la case de départ dans la file
+    visitee[depart.second][depart.first] = true;
+
+
+    vector<TypeDirection> dirs = {Nord, Sud, Est, Ouest}; //Pour regarder les voisins
+
+    while(file.size() > 0){
+        pair<int,int> courant = file.front(); //On prend le premier element de la file
+        file.pop(); //On le delete de la file après
+
+        if(courant == arrivee){
+            return vector<pair<int,int>>(10, {-5,5});
+        }
+
+        for (const TypeDirection& dir : dirs){
+            int x = courant.first;
+            int y = courant.second;
+
+            if (dir == Nord) y = y - 1;
+            if (dir == Sud)  y = y + 1;
+            if (dir == Ouest) x = x - 1;
+            if (dir == Est)   x = x + 1;
+
+            if(x < grille[0].size() && x >= 0 && y < grille.size() && y >= 0){ //On check si le voisin est dans les bornes.
+                if(visitee[y][x] == false && grille[y][x]->getType() != MUR){ //On Check si le voisin a déjà été visité et si il est de type MUR ou pas
+
+                    visitee[y][x] = true;
+                    parent[y][x] = courant;
+                    file.push({x,y});
+                }
+            }
+        }
+    }
+
+    return vector<pair<int,int>>(0); //Return de vecteur vide du même type que la fonc.
+
+}
+
+
+
+
+
+
+Case* Donjon::getCase(int x, int y){
+    if(x < grille[0].size() && x >= 0 && y < grille.size() && y >= 0){
+        return grille[y][x];
+    }
+    else{
+        return CaseFactory::creerCase(TypeCase::MUR);
+    }
+}
+
+void Donjon::setCase(int x, int y, Case* cas){
+    grille[y][x] = cas;
 }
