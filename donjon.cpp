@@ -62,7 +62,29 @@ void Donjon::placerEntreeSortie(int largeur, int hauteur){
     grille[hauteur-1][largeur-1] = CaseFactory::creerCase(TypeCase::SORTIE); //Sortie
 }
 void Donjon::placerElements(){
+    //RNG
+    mt19937 rng(std::random_device{}());
+    uniform_int_distribution<int> dist(0, 100);
 
+
+    for(int y=0; y < grille.size();y++){
+        for(int x = 0; x < grille[y].size();x++){
+            TypeCase type = PASSAGE;
+            if(grille[y][x]->getType() == PASSAGE){
+                int r = dist(rng);
+                if(r < 13){
+                    type = PIEGE; 
+                }
+                if(r < 10){
+                    type = MONSTRE;
+                }
+                if(r < 5){
+                    type = TRESOR;
+                }
+                grille[y][x] = CaseFactory::creerCase(type);
+            }
+        }
+    }
 }
 
 vector<pair<int,int>> Donjon::reconstruireChemin(vector<vector<pair<int,int>>> parent, pair<int,int> depart, pair<int,int>arrivee){
@@ -91,16 +113,16 @@ void Donjon::generer(int largeur, int hauteur){
     vector<vector<bool>> visited(hauteur,vector<bool>(largeur, false)); 
     genererLabyrinthe(0,0, visited);
     placerEntreeSortie(largeur, hauteur);
-    //placerElements();
+    placerElements();
 }
 
 void Donjon::afficher(){
     //Check pour voir si on affiche le path ideal ou pas:
-    vector<vector<bool>> dansCheminIdeal(grille.size(), vector<bool>(grille[0].size(), false)); //Vecteur copie bool de la grille pour voir si une case appartient au chemin ideal ou pas
+    vector<vector<bool>> dansCheminIdeal(grille.size(), vector<bool>(grille[0].size(), false)); //Vecteur copie bool de la grille pour voir si une case appartient au chemin ideal ou pas, il serait peut-être plus utile de le mettre en paramètre de classe.
     if(montrerCheminIdeal == true){
         vector<pair<int,int>> chemin; //Variable pour le chemin ideal
         pair<int,int> pos_Aventurier = {-1,-1};
-        for (int y = 0; y < grille.size(); y++) { //Pour trouver la position du joueur on scan pour 
+        for (int y = 0; y < grille.size(); y++) { //Pour trouver la position du joueur on scan, on aurait pu aussi faire passer la position du joueur en argument mais flemme.
             for (int x = 0; x < grille[y].size(); x++) {
                 if (grille[y][x]->getType() == AVENTURIER) {
                     pos_Aventurier = {x,y};
