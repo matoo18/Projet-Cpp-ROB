@@ -38,9 +38,10 @@ void Aventurier::afficherStatut(){
 }
 
 
-void Aventurier::generer(){
+void Aventurier::generer(Donjon& don){
     pv = 10;
     position = {0,0};
+    deplacer(0,0, don);
 }
 
 

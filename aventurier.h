@@ -18,7 +18,7 @@ class Aventurier{
     void afficherStatut();
     int getPv();
     pair<int,int> getPosition();
-    void generer();
+    void generer(Donjon& don);
     void deplacer(int x,int y, Donjon& don);
     void resoudreCase(Case* cas);
 };

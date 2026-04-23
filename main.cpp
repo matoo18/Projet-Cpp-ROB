@@ -9,12 +9,14 @@ int main(){
     Donjon don;
     Aventurier joueur;
 
+
+    //Initialisation Donjon + Joueur
     don.generer(21,11);//On génére le donjon.
-    joueur.deplacer(0,0, don); //On déplace le joueur dans la case 0,0
+    joueur.generer(don); //On génére le joueur dans la donjon
 
 
     while(joueur.estVivant() == true){ //Boucle de jeu
-        don.afficher(); //On affiche le donjon*
+        don.afficher(); //On affiche le donjon
         joueur.afficherStatut(); //On affiche les infos du joueur;
         
         int nx = joueur.getPosition().first;
@@ -37,8 +39,11 @@ int main(){
             case 'd':
                 nx += 1;
                 break;
+            case 'p':
+                don.toggleCheminIdeal();
+                break;
             default:
-                std::cout << "Tu fais quoi wsh!\n";
+                cout << "Tu fais quoi wsh!\n";
                 continue;
         }
 

@@ -41,8 +41,6 @@ void Donjon::genererLabyrinthe(int x, int y, vector<vector<bool>>& visited){
         if (dir == Ouest) nx = nx - 2;
         if (dir == Est)   nx = nx + 2;
 
-        //nx = clamp(nx,0,grille[0].size());
-
         if(nx < grille[0].size() && nx >= 0 &&
            ny < grille.size() && ny >= 0 &&
            visited[ny][nx] == false)
@@ -67,7 +65,7 @@ void Donjon::placerElements(){
 
 }
 
-vector<pair<int,int>> reconstruireChemin(vector<vector<pair<int,int>>> parent, pair<int,int> depart, pair<int,int>arrivee){
+vector<pair<int,int>> Donjon::reconstruireChemin(vector<vector<pair<int,int>>> parent, pair<int,int> depart, pair<int,int>arrivee){
     vector<pair<int,int>> chemin;
     pair<int,int>courant = arrivee;
     
@@ -85,7 +83,8 @@ vector<pair<int,int>> reconstruireChemin(vector<vector<pair<int,int>>> parent, p
 //FONC PUBLIQUES
 //#################################################################
 
-void Donjon::generer(int largeur, int hauteur){   
+void Donjon::generer(int largeur, int hauteur){
+    montrerCheminIdeal = false;
     initialiserLabyrinthe(hauteur, largeur);
 
     // Vecteur pour vérifier si les cases sont visitées ou pas, utilisé que pendant la génération.
@@ -96,6 +95,28 @@ void Donjon::generer(int largeur, int hauteur){
 }
 
 void Donjon::afficher(){
+    //Check pour voir si on affiche le path ideal ou pas:
+    vector<vector<bool>> dansCheminIdeal(grille.size(), vector<bool>(grille[0].size(), false)); //Vecteur copie bool de la grille pour voir si une case appartient au chemin ideal ou pas
+    if(montrerCheminIdeal == true){
+        vector<pair<int,int>> chemin; //Variable pour le chemin ideal
+        pair<int,int> pos_Aventurier = {-1,-1};
+        for (int y = 0; y < grille.size(); y++) { //Pour trouver la position du joueur on scan pour 
+            for (int x = 0; x < grille[y].size(); x++) {
+                if (grille[y][x]->getType() == AVENTURIER) {
+                    pos_Aventurier = {x,y};
+                }
+            }
+        } 
+        if(pos_Aventurier != make_pair(-1,-1)){
+            chemin = trouverChemin(pos_Aventurier, {grille[0].size()-1, grille.size() -1});
+        }else{
+            cout << "ERREUR DU CHEMIN IDEAL" << endl; //Si par malheur on ne trouve pas le joueur sur la grille, on n'affiche pas le chemin ideal.
+            toggleCheminIdeal();
+        }
+        for(const pair<int,int>& coord : chemin){
+            dansCheminIdeal[coord.second][coord.first] = true;
+        }
+    }
     //Print bordure du haut
     cout << "+";
     for (int i = 0; i < grille[0].size(); i++){
@@ -109,7 +130,14 @@ void Donjon::afficher(){
         cout << "|";
 
         for(int x = 0; x < grille[0].size(); x++){
-            grille[y][x]->afficher();
+            if(montrerCheminIdeal == true && dansCheminIdeal[y][x] == true){ //Les cases seront de couleur vertes si elles sont sur le chemin critique
+                cout << CHEMIN_COULEUR_IDEAL; //On met le print en couleur verte
+                grille[y][x]->afficher();
+                cout << CHEMIN_COULEUR_RESET;//On Reset
+                cout.flush();
+            }else{
+                grille[y][x]->afficher();
+            }
         }
 
         cout << "|";
@@ -142,7 +170,7 @@ vector<pair<int,int>> Donjon::trouverChemin(pair<int,int> depart, pair<int,int>a
         file.pop(); //On le delete de la file après
 
         if(courant == arrivee){
-            return vector<pair<int,int>>(10, {-5,5});
+            return reconstruireChemin(parent, depart, arrivee);
         }
 
         for (const TypeDirection& dir : dirs){
@@ -185,4 +213,14 @@ Case* Donjon::getCase(int x, int y){
 
 void Donjon::setCase(int x, int y, Case* cas){
     grille[y][x] = cas;
+}
+
+
+void Donjon::toggleCheminIdeal(){
+    if(montrerCheminIdeal == false){
+        montrerCheminIdeal = true;
+    }
+    else{
+        montrerCheminIdeal = false;
+    }
 }
