@@ -42,19 +42,20 @@ bool Aventurier::estVivant(){
     }
 }
 
-void Aventurier::afficherStatut(){
+void Aventurier::afficherStatut(Donjon& donjon){
     cout << "STATUT:" << endl;
     cout << "Point de Vie (PV): " << pv << endl;
-    cout << "Trésors: " << tresors << endl;
+    cout << "TrEsors: " << tresors << endl;
     cout << "Position Courante: (" << position.first << "," << position.second << ")" << endl;
+    cout << "Distance sortie: " << donjon.getDistanceSortie(position) << endl;
 }
 
 
 void Aventurier::generer(Donjon& don){
     pv = 10;
-    position = {0,0};
+    position = {1,1};
     tresors = 0;
-    deplacer(0,0, don);
+    don.setCase(1, 1, CaseFactory::creerCase(TypeCase::AVENTURIER));
 }
 
 
@@ -63,7 +64,7 @@ void Aventurier::deplacer(int nx,int ny, Donjon& don){
     if(nx != position_courante.first || ny != position_courante.second){ //Il faut que la nouvelle poisition soit différente de la position courante.
         if(don.getCase(nx,ny)->getType() != MUR){
             position = {nx,ny};
-            if(position_courante == make_pair(0,0)){
+            if(position_courante == make_pair(1,1)){
                 don.setCase(position_courante.first, position_courante.second, CaseFactory::creerCase(TypeCase::ENTREE)); // On set la case depuis la quelle l'aventurier s'est déplace à entrée si c'est en 0,0 ou a passage vu que la case sera résolue une fois l'avanturier qui se déplace.
             }
             else{

@@ -38,6 +38,7 @@ public:
     Case* getCase(int x, int y);
     void setCase(int x, int y, Case* cas);
     void toggleCheminIdeal();
+    int getDistanceSortie(pair<int,int> pos_joueur);
 };
 
 #endif

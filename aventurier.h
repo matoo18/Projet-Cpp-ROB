@@ -17,7 +17,7 @@ class Aventurier{
 
     public:
     bool estVivant();
-    void afficherStatut();
+    void afficherStatut(Donjon& donjon);
     int getPV();
     void setPV(int val);
     int getTresors();

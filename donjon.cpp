@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <random>
 #include <queue>
+#include <iostream>
 
 using namespace std;
 
@@ -58,8 +59,8 @@ void Donjon::genererLabyrinthe(int x, int y, vector<vector<bool>>& visited){
 }
 
 void Donjon::placerEntreeSortie(int largeur, int hauteur){
-    grille[0][0] = CaseFactory::creerCase(TypeCase::ENTREE); //Entrée
-    grille[hauteur-1][largeur-1] = CaseFactory::creerCase(TypeCase::SORTIE); //Sortie
+    grille[1][1] = CaseFactory::creerCase(TypeCase::ENTREE); //Entrée
+    grille[hauteur-2][largeur-2] = CaseFactory::creerCase(TypeCase::SORTIE); //Sortie
 }
 void Donjon::placerElements(){
     //RNG
@@ -111,7 +112,7 @@ void Donjon::generer(int largeur, int hauteur){
 
     // Vecteur pour vérifier si les cases sont visitées ou pas, utilisé que pendant la génération.
     vector<vector<bool>> visited(hauteur,vector<bool>(largeur, false)); 
-    genererLabyrinthe(0,0, visited);
+    genererLabyrinthe(1,1, visited);
     placerEntreeSortie(largeur, hauteur);
     placerElements();
 }
@@ -130,7 +131,7 @@ void Donjon::afficher(){
             }
         } 
         if(pos_Aventurier != make_pair(-1,-1)){
-            chemin = trouverChemin(pos_Aventurier, {grille[0].size()-1, grille.size() -1});
+            chemin = trouverChemin(pos_Aventurier, {grille[0].size()-2, grille.size() -2});
         }else{
             cout << "ERREUR DU CHEMIN IDEAL" << endl; //Si par malheur on ne trouve pas le joueur sur la grille, on n'affiche pas le chemin ideal.
             toggleCheminIdeal();
@@ -154,11 +155,11 @@ void Donjon::afficher(){
         for(int x = 0; x < grille[0].size(); x++){
             if(montrerCheminIdeal == true && dansCheminIdeal[y][x] == true){ //Les cases seront de couleur vertes si elles sont sur le chemin critique
                 cout << CHEMIN_COULEUR_IDEAL; //On met le print en couleur verte
-                grille[y][x]->afficher();
+                cout << *grille[y][x];
                 cout << CHEMIN_COULEUR_RESET;//On Reset
                 cout.flush();
             }else{
-                grille[y][x]->afficher();
+                cout << *grille[y][x];
             }
         }
 
@@ -219,9 +220,18 @@ vector<pair<int,int>> Donjon::trouverChemin(pair<int,int> depart, pair<int,int>a
 
 }
 
-
-
-
+int Donjon::getDistanceSortie(pair<int,int> pos_joueur){
+    // On cible la sortie (largeur-2, hauteur-2)
+    pair<int,int> sortie = {grille[0].size() - 2, grille.size() - 2};
+    
+    // utilise bfs pour trouver le chemin le plus court entre la position du joueur et la sortie
+    vector<pair<int,int>> chemin = trouverChemin(pos_joueur, sortie);
+    
+    if (chemin.size() > 0) {
+        return chemin.size() - 1; // -1 car le tableau contient la case de départ
+    }
+    return 0; // au cas où aucun chemin ne serait trouvé, ce qui ne devrait pas arriver...
+}
 
 
 Case* Donjon::getCase(int x, int y){

@@ -2,7 +2,7 @@
 #include "aventurier.h"
 #include <iostream>
 
-#define LARGEUR 11
+#define LARGEUR 21
 #define HAUTEUR 11
 using namespace std;
 
@@ -22,7 +22,7 @@ int main(){
 
 
     while(joueur.estVivant() == true){ //Boucle de jeu
-        joueur.afficherStatut(); //On affiche les infos du joueur;
+        joueur.afficherStatut(don); //On affiche les infos du joueur;
         don.afficher(); //On affiche le donjon
         
         int nx = joueur.getPosition().first;
