@@ -4,6 +4,8 @@
 
 #include <vector>
 #include <utility>
+#include <set>
+#include <chrono>
 
 using namespace std;
 
@@ -13,7 +15,14 @@ class Aventurier{
     private:
     int pv;
     int tresors;
+    int nbMonstresTues;
+    int nbMonstresEgalites;
+    int nbMonstresDefaites;
     pair<int,int> position;
+    // on va stocker les cases visitées dans un set pour éviter les doublons (c'est comme en Python)
+    set<pair<int,int>> cases_visitees;
+    int nbPas;
+    chrono::steady_clock::time_point debutExploration;
 
     public:
     bool estVivant();
@@ -23,9 +32,14 @@ class Aventurier{
     int getTresors();
     void setTresors(int val);
     pair<int,int> getPosition();
+    int getNbCasesVisitees();
     void generer(Donjon& don);
     void deplacer(int x,int y, Donjon& don);
     void resoudreCase(Case* cas);
+    void afficherStatistiques();
+    void ajouterKill();
+    void ajouterEqualite();
+    void ajouterDefaite();
 };
 
 

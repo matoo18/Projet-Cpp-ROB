@@ -169,16 +169,20 @@ void Monstre::effet(Aventurier& joueur) {
                 cout << "Le monstre laisse tomber une potion de heal ! (+1 PV) \n\n";
                 joueur.setPV(joueur.getPV() + 1); 
             }
+            joueur.ajouterKill();
             return;
         } else if (aventurierScore == monstreScore) {
             cout << "\nEGALITE ! Vous vous regardez dans les yeux, le malaise est palpable et chacun repart de son cote.\n\n";
+            joueur.ajouterEqualite();
         } else {
             cout << "\nDEFAITE ! Le monstre a gagne (-2 PV)...\n";
             joueur.setPV(joueur.getPV() - 2); 
+            joueur.ajouterDefaite();
         }
     } else {
         cout << "\nDEFAITE ! La gourmandise est un vilain defaut, vous en payez le prix fort ...\n\n";
         joueur.setPV(joueur.getPV() - 2); 
+        joueur.ajouterDefaite();
     }
     
     cout << "Appuyez sur une touche et entree pour continuer...\n";

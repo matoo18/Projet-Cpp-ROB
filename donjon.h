@@ -20,19 +20,27 @@ enum TypeDirection {
     Ouest
 };
 
+enum TypeAlgoGeneration {
+    BFS,
+    PRIM,
+    KRUSKAL
+};
+
 class Donjon {
 private:
     bool montrerCheminIdeal;
     std::vector<std::vector<Case*>> grille;
     void initialiserLabyrinthe(int hauteur, int largeur);
-    void genererLabyrinthe(int x, int y, std::vector<std::vector<bool>>& visited);
+    void genererLabyrintheBFS(int x, int y, std::vector<std::vector<bool>>& visited);
+    void genererLabyrinthePrim(int x, int y);
+    void genererLabyrintheKruskal();
     void placerElements();
     void placerEntreeSortie(int largeur, int hauteur);
     vector<pair<int,int>> reconstruireChemin(vector<vector<pair<int,int>>> parent, pair<int,int> depart, pair<int,int>arrivee);
 
 
 public:
-    void generer(int largeur, int hauteur);
+    void generer(int largeur, int hauteur, TypeAlgoGeneration algo = BFS);
     void afficher();
     vector<pair<int,int>> trouverChemin(pair<int,int> depart, pair<int,int>arrivee);
     Case* getCase(int x, int y);
