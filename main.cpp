@@ -1,13 +1,15 @@
 #include "donjon.h"
 #include "aventurier.h"
-#include <iostream>
 
-#define LARGEUR 31
+#include <iostream>
+#include <fstream>
+
+#define LARGEUR 21
 #define HAUTEUR 11
 
 using namespace std;
 
-TypeAlgoGeneration menuSelection() {
+TypeAlgoGeneration menuSelectionAlgo() {
     cout << "=====================================\n";
     cout << "    SELECTION GENERATEUR      \n";
     cout << "=====================================\n";
@@ -28,8 +30,23 @@ TypeAlgoGeneration menuSelection() {
     return BFS; 
 }
 
+bool menuChargerPartie() {
+    cout << "=====================================\n";
+    cout << "    COMMENCER PARTIE      \n";
+    cout << "=====================================\n";
+    cout << "1. Charger une partie sauvegardee\n";
+    cout << "2. Nouvelle partie\n";
+    cout << "Choix (1 ou 2) : ";
+    
+    char choix;
+    cin >> choix;
+
+    return choix == '1';
+}
+
 void boucleDeJeu(Aventurier& joueur, Donjon& don) {
-    while(joueur.estVivant() == true){
+    bool inGame = true;
+    while(joueur.estVivant() == true && joueur.getWin() == false && inGame == true){
         joueur.afficherStatut(don); 
         don.afficher(); 
         
@@ -45,12 +62,27 @@ void boucleDeJeu(Aventurier& joueur, Donjon& don) {
             case 'q': nx -= 1; break;
             case 'd': nx += 1; break;
             case 'p': don.toggleCheminIdeal(); break;
-            case 'i': 
+            case 'i': {
                 joueur.afficherStatistiques();
-                cout << "Appuyez sur une touche et Entrée pour reprendre...";
+                cout << "Appuyez sur une touche et entree pour reprendre...";
                 char pause;
                 cin >> pause;
                 continue;
+            }
+            case 'm': {
+                ofstream fichier("sauvegarde.txt");
+                if (fichier.is_open()) {
+                    don.sauvegarder(fichier);
+                    joueur.sauvegarder(fichier);
+                    fichier.close();
+                    cout << "Partie sauvegardee !\n";
+                    inGame = false; 
+                } 
+                else {
+                    cout << "Erreur lors de la sauvegarde.\n";
+                }
+                continue;
+            }
             default:
                 continue;
         }
@@ -65,9 +97,27 @@ int main(){
     Donjon don;
     Aventurier joueur;
 
-    TypeAlgoGeneration algoChoisi = menuSelection();
-    don.generer(LARGEUR, HAUTEUR, algoChoisi);
-    joueur.generer(don); 
+    if (menuChargerPartie()) {
+        ifstream fichier("sauvegarde.txt");
+        if (fichier.is_open()) {
+            don.charger(fichier);
+            joueur.charger(fichier);
+            fichier.close();
+            cout << "Partie chargee avec succes !\n";
+        } 
+        else {
+            cout << "Aucune sauvegarde trouvee, demarrage d'une nouvelle partie.\n";
+            TypeAlgoGeneration algoChoisi = menuSelectionAlgo();
+            don.generer(LARGEUR, HAUTEUR, algoChoisi);
+            joueur.generer(don); 
+        }
+    } 
+    else {
+        TypeAlgoGeneration algoChoisi = menuSelectionAlgo();
+        don.generer(LARGEUR, HAUTEUR, algoChoisi);
+        joueur.generer(don); 
+    }
+
     boucleDeJeu(joueur, don);
 
     return 0;

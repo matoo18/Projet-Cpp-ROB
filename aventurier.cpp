@@ -10,7 +10,6 @@
 
 using namespace std;
 
-
 //#################################################################
 //FONC PUBLIQUES
 //#################################################################
@@ -43,6 +42,13 @@ bool Aventurier::estVivant(){
     }
 }
 
+bool Aventurier::getWin(){
+    return win;
+}
+void Aventurier::setWin(bool val){
+    win = val;
+}
+
 void Aventurier::afficherStatut(Donjon& donjon){
     cout << "STATUT:" << endl;
     cout << "Point de Vie (PV): " << pv << endl;
@@ -50,7 +56,6 @@ void Aventurier::afficherStatut(Donjon& donjon){
     cout << "Position Courante: (" << position.first << "," << position.second << ")" << endl;
     cout << "Distance sortie: " << donjon.getDistanceSortie(position) << endl;
 }
-
 
 void Aventurier::generer(Donjon& don){
     pv = 10;
@@ -60,11 +65,11 @@ void Aventurier::generer(Donjon& don){
     nbMonstresEgalites= 0;
     nbMonstresDefaites= 0;
     nbPas = 0;
+    win = false;
     // on démarre le chrono dans generer comme c'est le début de l'exploration du donjon pour le joueur
     debutExploration = chrono::steady_clock::now();
     don.setCase(1, 1, CaseFactory::creerCase(TypeCase::AVENTURIER));
 }
-
 
 void Aventurier::deplacer(int nx,int ny, Donjon& don){
     pair<int,int> position_courante = position;
@@ -89,13 +94,14 @@ void Aventurier::deplacer(int nx,int ny, Donjon& don){
 void Aventurier::ajouterKill(){
     nbMonstresTues++;
 }
+
 void Aventurier::ajouterEqualite(){
     nbMonstresEgalites++;
 }
+
 void Aventurier::ajouterDefaite(){
     nbMonstresDefaites++;
 }
-    
 
 void Aventurier::resoudreCase(Case* cas){
     cas->effet(*this);
@@ -105,16 +111,51 @@ int Aventurier::getNbCasesVisitees(){
     return cases_visitees.size();
 }
 
-void Aventurier::afficherStatistiques(){
+auto Aventurier::getDuration(){
     auto maintenant = chrono::steady_clock::now();
-    auto duree = chrono::duration_cast<chrono::seconds>(maintenant - debutExploration).count();
+    return chrono::duration_cast<chrono::seconds>(maintenant - debutExploration).count();
+}
+
+void Aventurier::afficherStatistiques(){
     
     cout << "\n===============================\n";
     cout << "         STATISTIQUES          \n";
     cout << "===============================\n";
-    cout << "Temps d'exploration : " << duree << " secondes\n";
+    cout << "Temps d'exploration : " << this->getDuration() << " secondes\n";
     cout << "Nombre de pas : " << nbPas << "\n";
     cout << "Cases uniques visitees : " << cases_visitees.size() << "\n";
     cout << "Monstres : " << nbMonstresTues << " | " << nbMonstresEgalites << " | " << nbMonstresDefaites << " (V | E | D)\n";
     cout << "===============================\n";
+}
+
+void Aventurier::sauvegarder(ofstream& fichier) {
+    // récup stat de base
+    fichier << pv << " " << tresors << " " << nbMonstresTues << " " << nbPas << " " << nbMonstresDefaites << " " << nbMonstresEgalites << " " << this->getDuration() << "\n";
+    // récup position
+    fichier << position.first << " " << position.second << "\n";
+    
+    // récup cases visitées
+    fichier << cases_visitees.size() << "\n";
+    for (const auto& case_visitee : cases_visitees) {
+        fichier << case_visitee.first << " " << case_visitee.second << " ";
+    }
+    fichier << "\n";
+}
+
+void Aventurier::charger(ifstream& fichier) {
+    int duree_sauvegarde;
+    fichier >> pv >> tresors >> nbMonstresTues >> nbPas >> nbMonstresDefaites >> nbMonstresEgalites >> duree_sauvegarde; 
+    fichier >> position.first >> position.second;
+
+    debutExploration = chrono::steady_clock::now() - chrono::seconds(duree_sauvegarde);
+
+    int nbCases;
+    fichier >> nbCases;
+    cases_visitees.clear();
+    for (int i = 0; i < nbCases; i++) {
+        int x, y;
+        fichier >> x >> y;
+        cases_visitees.insert({x, y});
+    }
+    win = false;
 }

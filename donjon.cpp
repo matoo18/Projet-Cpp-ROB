@@ -5,10 +5,10 @@
 #include <algorithm>
 #include <random>
 #include <queue>
-#include <iostream>
+#include <fstream>
+
 
 using namespace std;
-
 
 void Donjon::initialiserLabyrinthe(int hauteur, int largeur){
     grille.resize(hauteur);
@@ -29,7 +29,7 @@ void Donjon::genererLabyrintheBFS(int x, int y, vector<vector<bool>>& visited){
 
     vector<TypeDirection> dirs = {Nord, Sud, Est, Ouest};
 
-    static mt19937 rng(std::random_device{}());
+    static mt19937 rng(random_device{}());
     shuffle(dirs.begin(), dirs.end(), rng);
 
     for (const TypeDirection& dir : dirs)
@@ -58,10 +58,172 @@ void Donjon::genererLabyrintheBFS(int x, int y, vector<vector<bool>>& visited){
     }
 }
 
+void Donjon::genererLabyrinthePrim(int x, int y) {
+    // contient toutes les cases murs adjacentes à une case déjà passage
+    vector<pair<int, int>> frontieres; 
+    mt19937 rng(random_device{}());
+
+    // case de départ transformée en passage car on est déjà dessus
+    grille[y][x] = CaseFactory::creerCase(TypeCase::PASSAGE);
+
+    // on regarde dans les 4 directions pour ajouter les murs adjacents à la case de départ dans la liste des frontières
+    // Le [&] permet d'accéder à toutes les variables de la méthode genérerLabyrinthePrim
+    auto ajouterFrontieres = [&](int x, int y) {
+        vector<pair<int, int>> dirs = {{0, -2}, {0, 2}, {-2, 0}, {2, 0}}; // N, S, O, E
+        for (auto d : dirs) {
+            int nx = x + d.first;
+            int ny = y + d.second;
+            // si c'est dans les limites de la map et que c'est un mur, on l'ajoute à la liste des frontières
+            if (nx > 0 && nx < grille[0].size() - 1 && ny > 0 && ny < grille.size() - 1) {
+                if (grille[ny][nx]->getType() == MUR) {
+                    frontieres.push_back({nx, ny});
+                }
+            }
+        }
+    };
+    ajouterFrontieres(x, y);
+
+    while (!frontieres.empty()) {
+        // tant que des frontières existent, on en choisit une au hasard
+        uniform_int_distribution<int> distFront(0, frontieres.size() - 1);
+        int index = distFront(rng);
+        pair<int, int> current = frontieres[index];
+
+        // pour supprimer la frontière choisie de la liste, on la remplace par la dernière parce qu'on se fiche de l'ordre, 
+        // et on pop_back pour supprimer la dernière qui est maintenant un doublon
+        frontieres[index] = frontieres.back();
+        frontieres.pop_back();
+
+        // si la frontière choisie est déjà un passage, on ne fait rien
+        if (grille[current.second][current.first]->getType() == PASSAGE) continue;
+
+        // on cherche les voisins de la frontière qui sont des passages, il doit y en avoir au moins un sinon on ne serait pas arrivé à cette frontière
+        // ensuite on choisira au hasard un de ces voisins pour connecter la frontière à ce voisin et créer un nouveau passage dans le labyrinthe
+        vector<pair<int, int>> dirs = {{0, -2}, {0, 2}, {-2, 0}, {2, 0}};
+        vector<pair<int, int>> voisinsPassages;
+        for (auto d : dirs) { // on boucle dans les 4 directions pour trouver les voisins passages de la frontière courante
+            int nx = current.first + d.first; 
+            int ny = current.second + d.second;
+            if (nx > 0 && nx < grille[0].size() - 1 && ny > 0 && ny < grille.size() - 1) {
+                if (grille[ny][nx]->getType() == PASSAGE) {
+                    voisinsPassages.push_back({nx, ny});
+                }
+            }
+        }
+
+        if (!voisinsPassages.empty()) {
+            // choisir un voisin passage au hasard auquel se connecter
+            uniform_int_distribution<int> randomVoisins(0, voisinsPassages.size() - 1);
+            pair<int, int> voisinChoisi = voisinsPassages[randomVoisins(rng)];
+
+            // la frontière choisie devient un passage
+            grille[current.second][current.first] = CaseFactory::creerCase(TypeCase::PASSAGE);
+            // on calcule les coordonnées du mur entre la frontière choisie et le voisin passage choisi juste au dessus
+            int mx = (current.first + voisinChoisi.first) / 2;
+            int my = (current.second + voisinChoisi.second) / 2;
+            // ce mur devient aussi un passage pour connecter la frontière au voisin
+            grille[my][mx] = CaseFactory::creerCase(TypeCase::PASSAGE);
+
+            // ajout des nouvelles frontières de la case passage qui vient d'être créée entre les 2
+            ajouterFrontieres(current.first, current.second);
+        }
+    }
+}
+
+void Donjon::genererLabyrintheKruskal() {
+    int largeur = grille[0].size();
+    int hauteur = grille.size();
+
+    // structure pour représenter un mur entre 2 cases de passage, avec les coordonnées du mur lui même et des deux cellules qu'il sépare
+    struct MurACasser {
+        int x, y;
+        int c1_x, c1_y;
+        int c2_x, c2_y;
+    };
+
+    vector<MurACasser> murs;
+
+    // transformer toutes les cases en passage et on remplit la liste des murs potentiels à casser entre ces passages
+    // en gros on boucle sur toute la grille et on transforme les cases impaires en passage
+    for (int y = 1; y < hauteur - 1; y += 2) {
+        for (int x = 1; x < largeur - 1; x += 2) {
+            grille[y][x] = CaseFactory::creerCase(TypeCase::PASSAGE);
+            
+            if (x + 2 < largeur - 1) { // si on est encore dans la map
+                // on ajoute le mur entre la case (x,y) et la case (x+2,y) dans la liste des murs à casser potentiels
+                // les coordonnées du mur sont (x+1,y) et il sépare les cellules (x,y) et (x+2,y)
+                murs.push_back({x + 1, y, x, y, x + 2, y});
+            }
+            // same pour le mur entre (x,y) et (x,y+2)
+            if (y + 2 < hauteur - 1) {
+                murs.push_back({x, y + 1, x, y, x, y + 2});
+            }
+        }
+    }
+    // on mélange la liste des murs à casser pour que l'algorithme de Kruskal soit aléatoire à chaque génération
+    mt19937 rng(random_device{}());
+    // on mélange l'intégralité du vecteur des murs
+    shuffle(murs.begin(), murs.end(), rng);
+
+    // on crée un vecteur parent de taille largeur*hauteur pour avoir toute la map
+    vector<int> parent(largeur * hauteur);
+    for (int i = 0; i < parent.size(); i++) {
+        // chaque cellule est son propre parent au début
+        parent[i] = i; 
+    }
+
+    // encore [&] pour accéder à toutes les variables de la méthode genererLabyrintheKruskal
+    auto find_set = [&](int v) {
+        // on check si la cellule v est son propre parent où si elle fait partir d'un groupe de cases déjà connectées
+        // si elle fait partie d'un groupe, on remonte jusqu'à trouver le parent de ce groupe qui est la racine
+        int root = v;
+        while (root != parent[root]) {
+            root = parent[root];
+        }
+        // pour éviter d'avoir à faire la longue remontée à chaque fois, on dit à toutes les cases rencontrées pendant la remontée
+        // que leur boss est root comme ça, à la prochaine itération find_set tombe direct sur le boss et voit qu'il n'y a personne au dessus.
+        int curr = v;
+        while (curr != root) {
+            int nxt = parent[curr];
+            parent[curr] = root;
+            curr = nxt;
+        }
+        return root;
+    };
+
+    // permet de fusionner 2 groupes de cases connectées 
+    auto union_sets = [&](int a, int b) {
+        int rootA = find_set(a); // on convoque le boss de la cellule a
+        int rootB = find_set(b); // et celui de la cellule b
+        if (rootA != rootB) { // et si c'est pas les mêmes, on les fusionne en disant que le boss de rootB devient rootA
+            // si c'était les mêmes boss ça veut dire que les cases a et b font déjà partie du même groupe de cases connectées, 
+            // et donc on ne veut pas les connecter entre elles pour éviter de créer des cycles dans le labyrinthe
+            parent[rootB] = rootA;
+        }
+    };
+
+    // jusqu'ici, on a juste crée les fonctions pour changer les boss de certains groupes de cases connectées mais y'a tjr les murs entre elles.
+    for (const auto& mur : murs) {
+        // on boucle sur tous les murs à casser potentiels dans un ordre aléatoire, et pour chacun on regarde les 2 cases de passage qu'il sépare
+        // on donne un id à chaque cellule pour pouvoir utiliser la structure de Kruskal.
+        int id1 = mur.c1_y * largeur + mur.c1_x;
+        int id2 = mur.c2_y * largeur + mur.c2_x;
+
+        // si leur boss est différent, ça veut dire que les 2 cases ne font pas partie du même groupe de cases connectées, donc on peut casser le mur entre elles sans créer de cycle
+        if (find_set(id1) != find_set(id2)) {
+            // on casse le mur en transformant la case du mur en passage
+            grille[mur.y][mur.x] = CaseFactory::creerCase(TypeCase::PASSAGE);
+            // et on fusionne les 2 groupes de cases connectées en changeant le boss de l'un des groupes pour qu'il devienne le même que celui de l'autre groupe
+            union_sets(id1, id2);
+        }
+    }
+}
+
 void Donjon::placerEntreeSortie(int largeur, int hauteur){
     grille[1][1] = CaseFactory::creerCase(TypeCase::ENTREE); //Entrée
     grille[hauteur-2][largeur-2] = CaseFactory::creerCase(TypeCase::SORTIE); //Sortie
 }
+
 void Donjon::placerElements(){
     //RNG
     mt19937 rng(std::random_device{}());
@@ -101,7 +263,6 @@ vector<pair<int,int>> Donjon::reconstruireChemin(vector<vector<pair<int,int>>> p
     return chemin;
 }
 
-
 //#################################################################
 //FONC PUBLIQUES
 //#################################################################
@@ -123,153 +284,6 @@ void Donjon::generer(int largeur, int hauteur, TypeAlgoGeneration algo){
         }
     placerEntreeSortie(largeur, hauteur);
     placerElements();
-}
-
-void Donjon::genererLabyrinthePrim(int x, int y) {
-    // Liste des cases "murs" qui sont adjacentes au labyrinthe en cours de construction
-    vector<pair<int, int>> frontieres; 
-    mt19937 rng(random_device{}());
-
-    // 1. Marquer la case de départ comme passage
-    grille[y][x] = CaseFactory::creerCase(TypeCase::PASSAGE);
-
-    // Fonction lambda (interne) pour ajouter les voisins distants de 2 cases aux frontières
-    auto ajouterFrontieres = [&](int x, int y) {
-        vector<pair<int, int>> dirs = {{0, -2}, {0, 2}, {-2, 0}, {2, 0}}; // N, S, O, E
-        for (auto d : dirs) {
-            int nx = x + d.first;
-            int ny = y + d.second;
-            // Vérification des bornes (on laisse la bordure extérieure intacte)
-            if (nx > 0 && nx < grille[0].size() - 1 && ny > 0 && ny < grille.size() - 1) {
-                if (grille[ny][nx]->getType() == MUR) {
-                    frontieres.push_back({nx, ny});
-                }
-            }
-        }
-    };
-
-    // On ajoute les frontières de la case de départ
-    ajouterFrontieres(x, y);
-
-    while (!frontieres.empty()) {
-        // Tirer une frontière au hasard
-        uniform_int_distribution<int> distFront(0, frontieres.size() - 1);
-        int index = distFront(rng);
-        pair<int, int> current = frontieres[index];
-
-        // Retirer cette frontière (on la remplace par la dernière puis on pop pour optimiser)
-        frontieres[index] = frontieres.back();
-        frontieres.pop_back();
-
-        // Si la case a déjà été transformée en passage entre-temps, on ignore
-        if (grille[current.second][current.first]->getType() == PASSAGE) continue;
-
-        // Chercher tous les voisins (distance 2) de cette frontière qui sont DÉJÀ des passages
-        vector<pair<int, int>> dirs = {{0, -2}, {0, 2}, {-2, 0}, {2, 0}};
-        vector<pair<int, int>> voisinsPassages;
-        for (auto d : dirs) {
-            int nx = current.first + d.first;
-            int ny = current.second + d.second;
-            if (nx > 0 && nx < grille[0].size() - 1 && ny > 0 && ny < grille.size() - 1) {
-                if (grille[ny][nx]->getType() == PASSAGE) {
-                    voisinsPassages.push_back({nx, ny});
-                }
-            }
-        }
-
-        if (!voisinsPassages.empty()) {
-            // Choisir un voisin passage au hasard auquel se connecter
-            uniform_int_distribution<int> distVoisins(0, voisinsPassages.size() - 1);
-            pair<int, int> voisinChoisi = voisinsPassages[distVoisins(rng)];
-
-            // Creuser la frontière actuelle ET le mur intermédiaire entre les deux
-            grille[current.second][current.first] = CaseFactory::creerCase(TypeCase::PASSAGE);
-            int mx = (current.first + voisinChoisi.first) / 2;
-            int my = (current.second + voisinChoisi.second) / 2;
-            grille[my][mx] = CaseFactory::creerCase(TypeCase::PASSAGE);
-
-            // Ajouter les nouvelles frontières découvertes depuis cette nouvelle case
-            ajouterFrontieres(current.first, current.second);
-        }
-    }
-}
-
-void Donjon::genererLabyrintheKruskal() {
-    int largeur = grille[0].size();
-    int hauteur = grille.size();
-
-    // 1. Structure pour représenter un mur entre deux cellules
-    struct MurA_Casser {
-        int x, y;         // Coordonnées du mur lui-même
-        int c1_x, c1_y;   // Cellule de passage 1
-        int c2_x, c2_y;   // Cellule de passage 2
-    };
-
-    vector<MurA_Casser> murs;
-
-    // 2. Transformer toutes les cellules (impaires) en passage et lister les murs entre elles
-    for (int y = 1; y < hauteur - 1; y += 2) {
-        for (int x = 1; x < largeur - 1; x += 2) {
-            grille[y][x] = CaseFactory::creerCase(TypeCase::PASSAGE);
-
-            // Mur de droite
-            if (x + 2 < largeur - 1) {
-                murs.push_back({x + 1, y, x, y, x + 2, y});
-            }
-            // Mur du bas
-            if (y + 2 < hauteur - 1) {
-                murs.push_back({x, y + 1, x, y, x, y + 2});
-            }
-        }
-    }
-
-    // 3. Mélanger tous les murs de façon aléatoire
-    mt19937 rng(std::random_device{}());
-    shuffle(murs.begin(), murs.end(), rng);
-
-    // 4. Structure Union-Find pour vérifier si deux cellules sont déjà reliées
-    vector<int> parent(largeur * hauteur);
-    for (int i = 0; i < parent.size(); i++) {
-        parent[i] = i; // Chaque cellule est initialement son propre chef
-    }
-
-    // Fonction Find avec compression de chemin
-    auto find_set = [&](int v) {
-        int root = v;
-        while (root != parent[root]) {
-            root = parent[root];
-        }
-        int curr = v;
-        while (curr != root) {
-            int nxt = parent[curr];
-            parent[curr] = root;
-            curr = nxt;
-        }
-        return root;
-    };
-
-    // Fonction Union
-    auto union_sets = [&](int a, int b) {
-        int rootA = find_set(a);
-        int rootB = find_set(b);
-        if (rootA != rootB) {
-            parent[rootB] = rootA;
-        }
-    };
-
-    // 5. Casser les murs selon Kruskal
-    for (const auto& mur : murs) {
-        // On donne un ID unique à chaque cellule (y * largeur + x)
-        int id1 = mur.c1_y * largeur + mur.c1_x;
-        int id2 = mur.c2_y * largeur + mur.c2_x;
-
-        // Si elles ne sont pas déjà reliées...
-        if (find_set(id1) != find_set(id2)) {
-            // ...on casse le mur et on fusionne leurs zones !
-            grille[mur.y][mur.x] = CaseFactory::creerCase(TypeCase::PASSAGE);
-            union_sets(id1, id2);
-        }
-    }
 }
 
 void Donjon::afficher(){
@@ -331,7 +345,6 @@ void Donjon::afficher(){
     cout << "\n";
 }
 
-
 vector<pair<int,int>> Donjon::trouverChemin(pair<int,int> depart, pair<int,int>arrivee){
     queue<pair<int,int>> file;
     vector<vector<bool>> visitee(grille.size(), vector<bool>(grille[0].size(), false));
@@ -388,7 +401,6 @@ int Donjon::getDistanceSortie(pair<int,int> pos_joueur){
     return 0; // au cas où aucun chemin ne serait trouvé, ce qui ne devrait pas arriver...
 }
 
-
 Case* Donjon::getCase(int x, int y){
     if(x < grille[0].size() && x >= 0 && y < grille.size() && y >= 0){
         return grille[y][x];
@@ -402,12 +414,44 @@ void Donjon::setCase(int x, int y, Case* cas){
     grille[y][x] = cas;
 }
 
-
 void Donjon::toggleCheminIdeal(){
     if(montrerCheminIdeal == false){
         montrerCheminIdeal = true;
     }
     else{
         montrerCheminIdeal = false;
+    }
+}
+
+void Donjon::sauvegarder(ofstream& fichier) {
+    int hauteur = grille.size();
+    int largeur = grille[0].size();
+    
+    // On écrit les dimensions
+    fichier << largeur << " " << hauteur << "\n";
+    
+    // On parcourt la grille et on écrit la valeur Enum de chaque type de case
+    for (int y = 0; y < hauteur; y++) {
+        for (int x = 0; x < largeur; x++) {
+            fichier << grille[y][x]->getType() << " ";
+        }
+        fichier << "\n";
+    }
+}
+
+void Donjon::charger(ifstream& fichier) {
+    // On récup les dimensions
+    int largeur, hauteur;
+    fichier >> largeur >> hauteur;
+    
+    initialiserLabyrinthe(hauteur, largeur);
+    
+    for (int y = 0; y < hauteur; y++) {
+        for (int x = 0; x < largeur; x++) {
+            int typeInt;
+            fichier >> typeInt;
+            TypeCase type = static_cast<TypeCase>(typeInt);
+            grille[y][x] = CaseFactory::creerCase(type);
+        }
     }
 }

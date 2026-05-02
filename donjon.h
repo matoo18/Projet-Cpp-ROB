@@ -7,7 +7,7 @@
 #include <vector>
 #include <utility>
 #include <queue>
-
+#include <fstream>
 
 using namespace std;
 
@@ -47,6 +47,8 @@ public:
     void setCase(int x, int y, Case* cas);
     void toggleCheminIdeal();
     int getDistanceSortie(pair<int,int> pos_joueur);
+    void sauvegarder(ofstream& fichier);
+    void charger(ifstream& fichier);
 };
 
 #endif

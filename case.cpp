@@ -34,8 +34,6 @@ Case* CaseFactory::creerCase(TypeCase type_of_case) {
     return nullptr;
 }
 
-
-
 void Monstre::effet(Aventurier& joueur) {
     cout << "\n=========================================\n";
     cout << " UN MONSTRE APARAIT : RIEN NE VA PLUS !" << endl;
@@ -46,6 +44,8 @@ void Monstre::effet(Aventurier& joueur) {
     uniform_int_distribution<int> dist(1, 13); // 1 = as, 11=valet, 12=dame, 13=roi
 
     // fonction pour tirer une carte 
+    // [&] ça lui passe toutes les variables de la méthode en référence
+    // on lui passe aussi certaines variables pour qu'elle fonctionne pour le monstre et le joueur
     auto tirerCarte = [&](int& score, int& nbAs, bool cache = false) {
         int carte = dist(rng);
         int valeur = (carte > 10) ? 10 : carte; // si la valeur de la carte est une tete alors on la borne à 10 sinon valeur de la carte
@@ -154,7 +154,7 @@ void Monstre::effet(Aventurier& joueur) {
         else cout << valeurCachee;
         cout << " -> Total : " << monstreScore << "\n";
 
-        // le croupier tire tant qu'il n'a pas au moins 17
+        // le croupier (oups le monstre je veux dire) tire tant qu'il n'a pas au moins 17
         while (monstreScore < 17) {
             cout << "Le monstre tire : ";
             tirerCarte(monstreScore, asMonstre, false);
@@ -190,12 +190,24 @@ void Monstre::effet(Aventurier& joueur) {
     cin >> pause;
 }
 
-
 void Tresor::effet(Aventurier& joueur) {
     joueur.setTresors(joueur.getTresors() + 1);
 }
 
 void Piege::effet(Aventurier& joueur) {
     joueur.setPV(joueur.getPV() - 1);
+}
+
+void Sortie::effet(Aventurier& joueur) {
+    cout << "\n=========================================\n";
+    cout << " VOUS AVEZ TROUVE LA SORTIE ! FELICITATIONS !" << endl;
+    cout << "=========================================\n";
+    joueur.setWin(true);
+}
+
+void Entree::effet(Aventurier& joueur) {
+    cout << "\n=========================================\n";
+    cout << " VOUS AVEZ TROUVE L'ENTREE ! C'EST PARTI POUR L'AVENTURE !" << endl;
+    cout << "=========================================\n";
 }
 

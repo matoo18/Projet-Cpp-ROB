@@ -6,6 +6,7 @@
 #include <utility>
 #include <set>
 #include <chrono>
+#include <fstream>
 
 using namespace std;
 
@@ -18,6 +19,7 @@ class Aventurier{
     int nbMonstresTues;
     int nbMonstresEgalites;
     int nbMonstresDefaites;
+    bool win;
     pair<int,int> position;
     // on va stocker les cases visitées dans un set pour éviter les doublons (c'est comme en Python)
     set<pair<int,int>> cases_visitees;
@@ -33,6 +35,7 @@ class Aventurier{
     void setTresors(int val);
     pair<int,int> getPosition();
     int getNbCasesVisitees();
+    auto getDuration();
     void generer(Donjon& don);
     void deplacer(int x,int y, Donjon& don);
     void resoudreCase(Case* cas);
@@ -40,6 +43,10 @@ class Aventurier{
     void ajouterKill();
     void ajouterEqualite();
     void ajouterDefaite();
+    void setWin(bool val);
+    bool getWin();
+    void sauvegarder(ofstream& fichier);
+    void charger(ifstream& fichier);
 };
 
 
