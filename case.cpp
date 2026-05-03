@@ -170,7 +170,6 @@ void Monstre::effet(Aventurier& joueur) {
                 joueur.setPV(joueur.getPV() + 1); 
             }
             joueur.ajouterKill();
-            return;
         } else if (aventurierScore == monstreScore) {
             cout << "\nEGALITE ! Vous vous regardez dans les yeux, le malaise est palpable et chacun repart de son cote.\n\n";
             joueur.ajouterEqualite();

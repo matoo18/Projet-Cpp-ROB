@@ -4,7 +4,7 @@
 #include <iostream>
 #include <fstream>
 
-#define LARGEUR 21
+#define LARGEUR 101
 #define HAUTEUR 11
 
 using namespace std;
@@ -13,7 +13,7 @@ TypeAlgoGeneration menuSelectionAlgo() {
     cout << "=====================================\n";
     cout << "    SELECTION GENERATEUR      \n";
     cout << "=====================================\n";
-    cout << "1. Labyrinthe classique - BFS\n";
+    cout << "1. Labyrinthe classique - Recursive Backtracking\n";
     cout << "2. Labyrinthe chaotique - PRIM\n";
     cout << "3. Labyrinthe equilibre - Kruskal\n";
     cout << "Choix de l'algorithme (1, 2 ou 3) : ";
@@ -27,7 +27,7 @@ TypeAlgoGeneration menuSelectionAlgo() {
     else if (choixAlgo == '3') {
         return KRUSKAL;
     }
-    return BFS; 
+    return RB; 
 }
 
 bool menuChargerPartie() {

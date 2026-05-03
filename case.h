@@ -1,7 +1,6 @@
 #ifndef CASE_H
 #define CASE_H
 
-
 #include <iostream>
 
 using namespace std;
@@ -83,16 +82,12 @@ class CaseAventurier : public Case {
 public:
     char afficher() const override;
     TypeCase getType() const override { return AVENTURIER; }
-    void effet(Aventurier& joueur) override { }
+    void effet(Aventurier& joueur) override {}
 };
-
-
 
 class CaseFactory {
 public:
     static Case* creerCase(TypeCase type);
 };
-
-CaseFactory* getFactory(TypeCase type_of_case);
 
 #endif

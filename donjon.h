@@ -21,7 +21,7 @@ enum TypeDirection {
 };
 
 enum TypeAlgoGeneration {
-    BFS,
+    RB,
     PRIM,
     KRUSKAL
 };
@@ -31,7 +31,7 @@ private:
     bool montrerCheminIdeal;
     std::vector<std::vector<Case*>> grille;
     void initialiserLabyrinthe(int hauteur, int largeur);
-    void genererLabyrintheBFS(int x, int y, std::vector<std::vector<bool>>& visited);
+    void genererLabyrintheRB(int x, int y, std::vector<std::vector<bool>>& visited);
     void genererLabyrinthePrim(int x, int y);
     void genererLabyrintheKruskal();
     void placerElements();
@@ -40,7 +40,7 @@ private:
 
 
 public:
-    void generer(int largeur, int hauteur, TypeAlgoGeneration algo = BFS);
+    void generer(int largeur, int hauteur, TypeAlgoGeneration algo = RB);
     void afficher();
     vector<pair<int,int>> trouverChemin(pair<int,int> depart, pair<int,int>arrivee);
     Case* getCase(int x, int y);

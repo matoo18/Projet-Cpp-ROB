@@ -7,7 +7,6 @@
 #include <queue>
 #include <fstream>
 
-
 using namespace std;
 
 void Donjon::initialiserLabyrinthe(int hauteur, int largeur){
@@ -24,7 +23,7 @@ void Donjon::initialiserLabyrinthe(int hauteur, int largeur){
     }
 }
 
-void Donjon::genererLabyrintheBFS(int x, int y, vector<vector<bool>>& visited){
+void Donjon::genererLabyrintheRB(int x, int y, vector<vector<bool>>& visited){
     visited[y][x] = true; //Case visitée
 
     vector<TypeDirection> dirs = {Nord, Sud, Est, Ouest};
@@ -53,7 +52,7 @@ void Donjon::genererLabyrintheBFS(int x, int y, vector<vector<bool>>& visited){
             grille[ny][nx] = CaseFactory::creerCase(TypeCase::PASSAGE);
             // Création passage entre cases (x,y) et (nx,ny)
 
-            genererLabyrintheBFS(nx, ny, visited);
+            genererLabyrintheRB(nx, ny, visited);
         }
     }
 }
@@ -143,7 +142,7 @@ void Donjon::genererLabyrintheKruskal() {
 
     vector<MurACasser> murs;
 
-    // transformer toutes les cases en passage et on remplit la liste des murs potentiels à casser entre ces passages
+    // transformer toutes les cases impaires en passage et on remplit la liste des murs potentiels à casser entre ces passages
     // en gros on boucle sur toute la grille et on transforme les cases impaires en passage
     for (int y = 1; y < hauteur - 1; y += 2) {
         for (int x = 1; x < largeur - 1; x += 2) {
@@ -272,9 +271,9 @@ void Donjon::generer(int largeur, int hauteur, TypeAlgoGeneration algo){
     initialiserLabyrinthe(hauteur, largeur);
 
     // Vecteur pour vérifier si les cases sont visitées ou pas, utilisé que pendant la génération.
-    if (algo == BFS) {
+    if (algo == RB) {
         vector<vector<bool>> visited(hauteur,vector<bool>(largeur, false)); 
-        genererLabyrintheBFS(1,1, visited);
+        genererLabyrintheRB(1,1, visited);
     } 
     else if (algo == PRIM) {
         genererLabyrinthePrim(1, 1);

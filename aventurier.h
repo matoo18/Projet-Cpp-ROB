@@ -1,7 +1,6 @@
 #ifndef AVENTURIER_H
 #define AVENTURIER_H
 
-
 #include <vector>
 #include <utility>
 #include <set>
@@ -13,7 +12,7 @@ using namespace std;
 class Donjon;
 
 class Aventurier{
-    private:
+private:
     int pv;
     int tresors;
     int nbMonstresTues;
@@ -25,8 +24,7 @@ class Aventurier{
     set<pair<int,int>> cases_visitees;
     int nbPas;
     chrono::steady_clock::time_point debutExploration;
-
-    public:
+public:
     bool estVivant();
     void afficherStatut(Donjon& donjon);
     int getPV();
@@ -48,6 +46,5 @@ class Aventurier{
     void sauvegarder(ofstream& fichier);
     void charger(ifstream& fichier);
 };
-
 
 #endif

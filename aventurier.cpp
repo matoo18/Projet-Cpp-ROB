@@ -10,10 +10,6 @@
 
 using namespace std;
 
-//#################################################################
-//FONC PUBLIQUES
-//#################################################################
-
 int Aventurier::getPV(){
     return pv;
 }
@@ -21,6 +17,7 @@ int Aventurier::getPV(){
 void Aventurier::setPV(int val){
     pv = val;
 }
+
 int Aventurier::getTresors(){
     return tresors;
 }
@@ -45,16 +42,21 @@ bool Aventurier::estVivant(){
 bool Aventurier::getWin(){
     return win;
 }
+
 void Aventurier::setWin(bool val){
     win = val;
 }
 
 void Aventurier::afficherStatut(Donjon& donjon){
-    cout << "STATUT:" << endl;
+    cout << "\n===============================\n";
+    cout << "         STATUT ACTUEL          \n";
+    cout << "===============================\n";
     cout << "Point de Vie (PV): " << pv << endl;
     cout << "TrEsors: " << tresors << endl;
     cout << "Position Courante: (" << position.first << "," << position.second << ")" << endl;
     cout << "Distance sortie: " << donjon.getDistanceSortie(position) << endl;
+    cout << "Commandes : z (haut), s (bas), q (gauche), d (droite), i (statistiques), m (sauvegarder et quitter)\n";
+    cout << "===============================\n";
 }
 
 void Aventurier::generer(Donjon& don){
