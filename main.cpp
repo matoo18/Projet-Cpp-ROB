@@ -4,7 +4,7 @@
 #include <iostream>
 #include <fstream>
 
-#define LARGEUR 101
+#define LARGEUR 41
 #define HAUTEUR 11
 
 using namespace std;

@@ -36,9 +36,9 @@ Case* CaseFactory::creerCase(TypeCase type_of_case) {
 
 void Monstre::effet(Aventurier& joueur) {
     cout << "\n=========================================\n";
-    cout << " UN MONSTRE APARAIT : RIEN NE VA PLUS !" << endl;
+    cout << " UN MONSTRE APARAIT : RIEN NE VA PLUS ! " << endl;
     cout << "=========================================\n";
-
+    
     // init aléatoire
     static mt19937 rng(random_device{}());
     uniform_int_distribution<int> dist(1, 13); // 1 = as, 11=valet, 12=dame, 13=roi
@@ -203,10 +203,3 @@ void Sortie::effet(Aventurier& joueur) {
     cout << "=========================================\n";
     joueur.setWin(true);
 }
-
-void Entree::effet(Aventurier& joueur) {
-    cout << "\n=========================================\n";
-    cout << " VOUS AVEZ TROUVE L'ENTREE ! C'EST PARTI POUR L'AVENTURE !" << endl;
-    cout << "=========================================\n";
-}
-

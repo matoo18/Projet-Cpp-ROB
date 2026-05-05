@@ -68,7 +68,7 @@ class Entree : public Case {
 public:
     char afficher() const override;
     TypeCase getType() const override { return ENTREE; }
-    void effet(Aventurier& joueur) override;
+    void effet(Aventurier& joueur) override {};
 };
 
 class Sortie : public Case {
