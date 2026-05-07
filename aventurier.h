@@ -14,6 +14,7 @@ class Donjon;
 class Aventurier{
 private:
     int pv;
+    int pvMax; 
     int tresors;
     int nbMonstresTues;
     int nbMonstresEgalites;

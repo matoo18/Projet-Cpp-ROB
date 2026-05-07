@@ -7,6 +7,15 @@
 #include <random>
 #include <queue>
 #include <chrono>
+#include<string>
+
+const string RESET = "\033[0m";
+const string RED = "\033[31m";
+const string GREEN = "\033[32m";
+const string YELLOW = "\033[33m";
+const string BLUE = "\033[34m";
+const string MAGENTA = "\033[35m";
+const string CYAN = "\033[36m";
 
 using namespace std;
 
@@ -15,7 +24,7 @@ int Aventurier::getPV(){
 }
 
 void Aventurier::setPV(int val){
-    pv = val;
+    (val > pvMax) ? pv = pvMax + (val - pv) : pv = val;
 }
 
 int Aventurier::getTresors(){
@@ -48,19 +57,23 @@ void Aventurier::setWin(bool val){
 }
 
 void Aventurier::afficherStatut(Donjon& donjon){
-    cout << "\n===============================\n";
+    cout << BLUE << "\n===============================\n";
     cout << "         STATUT ACTUEL          \n";
-    cout << "===============================\n";
-    cout << "Point de Vie (PV): " << pv << endl;
-    cout << "TrEsors: " << tresors << endl;
-    cout << "Position Courante: (" << position.first << "," << position.second << ")" << endl;
-    cout << "Distance sortie: " << donjon.getDistanceSortie(position) << endl;
+    cout << "===============================\n" << RESET;
+    string COLOR = GREEN;
+    if (pv < 7) COLOR = YELLOW;
+    if (pv < 4) COLOR = RED;
+    cout << COLOR << "Point de Vie (PV): " << pv << "/10" << RESET << endl;
+    cout << YELLOW << "Tresors: " << tresors << RESET << endl;
+    cout << RED << "Position Courante: (" << position.first << "," << position.second << ")" << RESET << endl;
+    cout << CYAN << "Distance sortie: " << donjon.getDistanceSortie(position) << RESET << endl;
     cout << "Commandes : z (haut), s (bas), q (gauche), d (droite), i (statistiques), m (sauvegarder et quitter)\n";
-    cout << "===============================\n";
+    cout << BLUE << "===============================\n" << RESET;
 }
 
 void Aventurier::generer(Donjon& don){
     pv = 10;
+    pvMax = 10;
     position = {1,1};
     tresors = 0;
     nbMonstresTues=0;
@@ -120,13 +133,13 @@ auto Aventurier::getDuration(){
 
 void Aventurier::afficherStatistiques(){
     
-    cout << "\n===============================\n";
+    cout << BLUE << "\n===============================\n";
     cout << "         STATISTIQUES          \n";
-    cout << "===============================\n";
-    cout << "Temps d'exploration : " << this->getDuration() << " secondes\n";
+    cout << "===============================\n" << RESET;
+    cout << CYAN << "Temps d'exploration : " << this->getDuration() << " secondes\n" << RESET;
     cout << "Nombre de pas : " << nbPas << "\n";
-    cout << "Cases uniques visitees : " << cases_visitees.size() << "\n";
-    cout << "Monstres : " << nbMonstresTues << " | " << nbMonstresEgalites << " | " << nbMonstresDefaites << " (V | E | D)\n";
+    cout << MAGENTA << "Cases uniques visitees : " << cases_visitees.size() << "\n" << RESET;
+    cout << "Monstres : " << GREEN << nbMonstresTues << RESET << " | " << nbMonstresEgalites << " | " << RED << nbMonstresDefaites << RESET << " (V | E | D)\n";
     cout << "===============================\n";
 }
 

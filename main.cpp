@@ -1,5 +1,6 @@
 #include "donjon.h"
 #include "aventurier.h"
+#include "stdlib.h"
 
 #include <iostream>
 #include <fstream>
@@ -10,9 +11,9 @@
 using namespace std;
 
 TypeAlgoGeneration menuSelectionAlgo() {
-    cout << "=====================================\n";
+    cout << "\033[34m" << "=====================================\n";
     cout << "    SELECTION GENERATEUR      \n";
-    cout << "=====================================\n";
+    cout << "=====================================\n\n" << "\033[0m";
     cout << "1. Labyrinthe classique - Recursive Backtracking\n";
     cout << "2. Labyrinthe chaotique - PRIM\n";
     cout << "3. Labyrinthe equilibre - Kruskal\n";
@@ -20,6 +21,7 @@ TypeAlgoGeneration menuSelectionAlgo() {
     
     char choixAlgo;
     cin >> choixAlgo;
+    cout << endl;
 
     if (choixAlgo == '2') {
         return PRIM;
@@ -31,9 +33,9 @@ TypeAlgoGeneration menuSelectionAlgo() {
 }
 
 bool menuChargerPartie() {
-    cout << "=====================================\n";
+    cout << "\033[34m" << "=====================================\n";
     cout << "    COMMENCER PARTIE      \n";
-    cout << "=====================================\n";
+    cout << "=====================================\n\n" << "\033[0m";
     cout << "1. Charger une partie sauvegardee\n";
     cout << "2. Nouvelle partie\n";
     cout << "Choix (1 ou 2) : ";
@@ -86,7 +88,7 @@ void boucleDeJeu(Aventurier& joueur, Donjon& don) {
             default:
                 continue;
         }
-
+        system("clear"); 
         joueur.deplacer(nx,ny, don);
     }
     cout << "\n=== FIN DE LA PARTIE ===\n";
